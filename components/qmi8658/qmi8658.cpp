@@ -1,6 +1,7 @@
 #include "qmi8658.h"
 
 #include "esphome/core/log.h"
+#include "esphome/components/i2c/i2c_bus_esp_idf.h"
 
 // #include <Arduino.h>
 // #include <Wire.h>
@@ -23,33 +24,48 @@ void QMI8658Component::setup() {
  
     // Wire.begin(I2C_SDA, I2C_SCL);
     // if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS)) {
+#if defined(ARDUINO)
     if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS, I2C_SDA, I2C_SCL)) {
         ESP_LOGE(TAG, "Failed to find QMI8658 - check your wiring!");
     }
+#elif defined(ESP_PLATFORM)
+    i2c::IDFI2CBus *idf_bus = static_cast<i2c::IDFI2CBus*>(this->bus_);
+// #ifdef CONFIG_SENSORLIB_ESP_IDF_NEW_API
+//     /* New API syntax, define CONFIG_SENSORLIB_ESP_IDF_NEW_API */
+//     if (!qmi8658.begin(idf_bus->bus_, QMI8658_L_SLAVE_ADDRESS) {
+//         ESP_LOGE(TAG, "Failed to find QMI8658 - check your wiring!");
+//     }
+// #else
+    /* Use explicit pins */ 
+    // if (!qmi8658.begin((i2c_port_t)(idf_bus->get_port()), QMI8658_L_SLAVE_ADDRESS, I2C_SDA, I2C_SCL)) {
+    if (!qmi8658.begin((i2c_port_t)(idf_bus->get_port()), QMI8658_L_SLAVE_ADDRESS)) {
+        ESP_LOGE(TAG, "Failed to find QMI8658 - check your wiring!");
+    }
+// #endif  //CONFIG_SENSORLIB_ESP_IDF_NEW_API
+#endif  // PLATFORM
+
     ESP_LOGI(TAG, "Device ID: %x",qmi8658.getChipID());
     
     qmi8658.configAccelerometer(
         this->accel_range_,
         this->accel_odr_,
-        this->accel_lpf_mode_,
-        true);
+        this->accel_lpf_mode_);
     qmi8658.configGyroscope(
         this->gyro_range_,
         this->gyro_odr_,
-        this->gyro_lpf_mode_,
-        true);
+        this->gyro_lpf_mode_);
 
     if (this->interrupt_pin_1_ != nullptr)  // Don't seem to work very well? Use interrupt 2
     {
         this->interrupt_pin_1_->setup();
-        qmi8658.enableINT(SensorQMI8658::IntPin1);
+        qmi8658.enableINT(SensorQMI8658::IntPin::INTERRUPT_PIN_1);
         qmi8658.enableDataReadyINT();
         ESP_LOGI(TAG, "Interrupt 1 enabled");
     }
     if (this->interrupt_pin_2_ != nullptr)
     {
         this->interrupt_pin_2_->setup();
-        qmi8658.enableINT(SensorQMI8658::IntPin2);
+        qmi8658.enableINT(SensorQMI8658::IntPin::INTERRUPT_PIN_2);
         qmi8658.enableDataReadyINT();
         ESP_LOGI(TAG, "Interrupt 2 enabled");
     }

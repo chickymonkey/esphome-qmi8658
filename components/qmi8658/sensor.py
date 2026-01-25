@@ -134,7 +134,8 @@ temperature_schema = sensor.sensor_schema(
 
 
 CONFIG_SCHEMA = cv.All(
-    cv.only_with_arduino,
+    # cv.only_with_arduino,
+    # cv.require_esphome_version(2025, 11, 0),
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(QMI8658Component),
@@ -174,6 +175,13 @@ CONFIG_SCHEMA = cv.All(
 
 
 async def to_code(config):
+    cg.add_library(
+        "SensorLib",
+        None,
+        None,
+    )
+    # cg.add_define("CONFIG_SENSORLIB_ESP_IDF_NEW_API")
+
     var = cg.new_Pvariable(config[CONF_ID])
 
     if CONF_INTERRUPT_PIN_1 in config:
