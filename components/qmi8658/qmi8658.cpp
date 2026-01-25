@@ -8,9 +8,9 @@
 #include "SensorQMI8658.hpp"                    
 #include <cmath>
 
-// TODO: How to get this from i2c bus instead of hard-coded?
-#define I2C_SDA       11
-#define I2C_SCL       12
+/* Shoudl not be needed anymore, but keep in case explicit pins are needed */
+// #define I2C_SDA       11
+// #define I2C_SCL       12
 
 namespace esphome {
 namespace qmi8658 {
@@ -18,14 +18,10 @@ namespace qmi8658 {
 static const char *TAG = "qmi8658";
 
 void QMI8658Component::setup() {
-    // uint8_t sda_pin = this->bus_->sda_pin_;
-    // uint8_t scl_pin = this->bus_->scl_pin_;
-    // ESP_LOGI(TAG, "SDA: %u   SCL: %u", sda_pin, scl_pin);
- 
-    // Wire.begin(I2C_SDA, I2C_SCL);
-    // if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS)) {
 #if defined(ARDUINO)
-    if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS, I2C_SDA, I2C_SCL)) {
+    /* Use explicit pins */ 
+    // if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS, I2C_SDA, I2C_SCL)) {
+    if (!qmi8658.begin(Wire, QMI8658_L_SLAVE_ADDRESS)) {
         ESP_LOGE(TAG, "Failed to find QMI8658 - check your wiring!");
     }
 #elif defined(ESP_PLATFORM)
