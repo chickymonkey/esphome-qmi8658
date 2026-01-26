@@ -60,6 +60,8 @@ sensor:
       name: "QMI8658 Acceleration Y"
     acceleration_z:
       name: "QMI8658 Acceleration Z"
+      filters:
+        - multiply: -1.0   # Invert Z axis to match orientation
     gyroscope_x:
       name: "QMI8658 Gyro X"
     gyroscope_y:
