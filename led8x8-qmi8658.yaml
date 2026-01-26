@@ -7,6 +7,7 @@ substitutions:
 esp32:
   board: esp32-s3-devkitc-1
   framework:
+    # type: arduino
     type: esp-idf
 
 wifi:
@@ -36,13 +37,9 @@ esphome:
   platformio_options:
     board_build.flash_mode: dio
 
-  libraries:
-    # - "Wire"
-    # - "SPI"
-    # - "SensorLib"
-
 external_components:
-  - source: components
+  # - source: components  # Use this for local developement
+  - source: github://dala318/esphome-qmi8658
     components: [qmi8658]
     refresh: 5s
 

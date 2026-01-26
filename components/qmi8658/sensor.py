@@ -176,23 +176,24 @@ CONFIG_SCHEMA = cv.All(
 
 
 async def to_code(config):
-    cg.add_library(
-        "SensorLib",
-        None,
-        None,
-    )
-
     if core.CORE.using_arduino:
         # Needed for SensorLib to compile, even if not directly used here
+        cg.add_global(cg.RawStatement("#include <SPI.h>"))
         cg.add_library(
             "SPI",
-            None,
+            "3.1.3",
             None,
         )
     elif core.CORE.using_esp_idf:
         pass
         # SensorLib has the option to pass i2c_handle to its initialization in ESP-IDF
         # cg.add_define("CONFIG_SENSORLIB_ESP_IDF_NEW_API")
+
+    cg.add_library(
+        "SensorLib",
+        "0.3.4",  # Use "None" for latest
+        None,
+    )
 
     var = cg.new_Pvariable(config[CONF_ID])
 
