@@ -20,7 +20,7 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
 )
-from esphome import pins
+from esphome import pins, core
 
 CONF_INTERRUPT_GROUP = "interrupt_group"
 CONF_INTERRUPT_PIN_1 = CONF_INTERRUPT_PIN + "_1"
@@ -56,13 +56,14 @@ QMI8658AccelODR = SensorQMI8658_ns.enum("AccelOdr")
 QMI8658AccelODRs = {
     "1000HZ":   QMI8658AccelODR.ACC_ODR_1000Hz,
     "500HZ":    QMI8658AccelODR.ACC_ODR_500Hz,
+    "250Hz":    QMI8658AccelODR.ACC_ODR_250Hz,
     "125HZ":    QMI8658AccelODR.ACC_ODR_125Hz,
     "62.5HZ":   QMI8658AccelODR.ACC_ODR_62_5Hz,
     "31.25HZ":  QMI8658AccelODR.ACC_ODR_31_25Hz,
-    "LP_125HZ": QMI8658AccelODR.ACC_ODR_LOWPOWER_128Hz,
+    "LP_128HZ": QMI8658AccelODR.ACC_ODR_LOWPOWER_128Hz,
     "LP_21HZ":  QMI8658AccelODR.ACC_ODR_LOWPOWER_21Hz,
     "LP_11HZ":  QMI8658AccelODR.ACC_ODR_LOWPOWER_11Hz,
-    "LP_3HZ":   QMI8658AccelODR.ACC_ODR_LOWPOWER_3Hz,
+    "LP_3HZ":   QMI8658AccelODR.ACC_ODR_LOWPOWER_3H,
 }
 
 QMI8658GyroRange = SensorQMI8658_ns.enum("GyroRange")
@@ -134,7 +135,8 @@ temperature_schema = sensor.sensor_schema(
 
 
 CONFIG_SCHEMA = cv.All(
-    cv.only_with_arduino,
+    # cv.only_with_arduino,
+    # cv.require_esphome_version(2025, 11, 0),
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(QMI8658Component),
@@ -174,6 +176,25 @@ CONFIG_SCHEMA = cv.All(
 
 
 async def to_code(config):
+    if core.CORE.using_arduino:
+        # Needed for SensorLib to compile, even if not directly used here
+        cg.add_global(cg.RawStatement("#include <SPI.h>"))
+        cg.add_library(
+            "SPI",
+            "3.1.3",
+            None,
+        )
+    elif core.CORE.using_esp_idf:
+        pass
+        # SensorLib has the option to pass i2c_handle to its initialization in ESP-IDF
+        # cg.add_define("CONFIG_SENSORLIB_ESP_IDF_NEW_API")
+
+    cg.add_library(
+        "SensorLib",
+        "0.3.4",  # Use "None" for latest
+        None,
+    )
+
     var = cg.new_Pvariable(config[CONF_ID])
 
     if CONF_INTERRUPT_PIN_1 in config:

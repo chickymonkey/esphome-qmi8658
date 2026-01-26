@@ -2,22 +2,18 @@
 
 Using [SensorLib](https://github.com/lewisxhe/SensorLib) by @lewisxhe
 
-Add the following to your ESPHome config
-
 (Check out the attached `led8x8-qmi8658.yaml` for a more complete config using the [ESP32-S3-Matrix](https://www.waveshare.com/wiki/ESP32-S3-Matrix) )
+
+Add the following to your ESPHome config (now works with both ESP-IDF and Arduino)
 
 ```yaml
 esphome:
   platformio_options:
     board_build.flash_mode: dio
-  libraries:
-    - "Wire"
-    - "SPI"
-    # - "SensorLib"
-    - "SensorLib@0.2.1"  # Some change after v0.2.1 makes compiling fail
 
 external_components:
-- source: github://dala318/esphome-qmi8658
+  - source: github://dala318/esphome-qmi8658
+    components: [qmi8658]
 
 i2c:
   sda: GPIO11
