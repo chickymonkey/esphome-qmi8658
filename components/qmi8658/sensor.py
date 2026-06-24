@@ -184,7 +184,7 @@ async def to_code(config):
             "3.1.3",
             None,
         )
-    elif core.CORE.using_esp_idf:
+    elif core.CORE.is_esp32 and not core.CORE.using_arduino:
         pass
         # SensorLib has the option to pass i2c_handle to its initialization in ESP-IDF
         # cg.add_define("CONFIG_SENSORLIB_ESP_IDF_NEW_API")
